@@ -8,3 +8,5 @@ mod watchers;
 pub use crate::report_client::ReportClient;
 pub use crate::watchers::run_first_supported;
 pub use crate::watchers::WatcherType;
+
+pub use aw_client_rust::CapturePolicy;
