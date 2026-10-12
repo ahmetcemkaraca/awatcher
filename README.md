@@ -1,3 +1,14 @@
+# PeakActivity capture integration (development)
+
+Scoped, renewable local capture credentials through aw-client-rust and source-specific consent before starting window and idle watchers.
+
+Build the collector in the PeakActivity source graph alongside the matching aw-server-rust workspace. watchers/Cargo.toml consumes the sibling aw-server-rust/aw-client-rust source; retain its exact recorded revision.
+
+This is independent PeakActivity development based on the upstream project.
+PeakActivity is not affiliated with or endorsed by its upstream authors.
+The inherited documentation below describes upstream usage and distributions.
+See [source provenance and license notices](FORKED_FROM.md) for this revision.
+
 # Awatcher
 [![Check](https://github.com/2e3s/awatcher/actions/workflows/verify.yml/badge.svg)](https://github.com/2e3s/awatcher/actions/workflows/verify.yml)
 [![Dependency Status](https://deps.rs/repo/github/2e3s/awatcher/status.svg)](https://deps.rs/repo/github/2e3s/awatcher)

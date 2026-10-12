@@ -61,7 +61,7 @@ pub fn from_cli() -> anyhow::Result<RunnerConfig> {
         .version(env!("CARGO_PKG_VERSION"))
         .about(
             #[cfg(not(feature = "bundle"))]
-            "X11 and Wayland active window and idle watcher for ActivityWatch server",
+            "PeakActivity X11 and Wayland activity collector (ActivityWatch-compatible API)",
             #[cfg(feature = "bundle")]
             "X11 and Wayland active window and idle watcher with a bundled ActivityWatch server",
         )

@@ -45,6 +45,7 @@ aw-server = { git = "https://github.com/ActivityWatch/aw-server-rust", optional 
 aw-datastore = { git = "https://github.com/ActivityWatch/aw-server-rust", optional = true, rev = "2875df5" }
 open = { version = "5.3.2", optional = true }
 serde = { workspace = true }
+serde_json = "1"
 dirs = "6"
 
 [features]

@@ -112,7 +112,7 @@ impl ReportClient {
         let mut data = Map::new();
 
         if let Some((inserted_app_id, inserted_title)) = self.get_filtered_data(app_id, title) {
-            trace!("Reporting app_id: {inserted_app_id}, title: {inserted_title}");
+            trace!("Reporting a filtered window event");
 
             data.insert("app".to_string(), Value::String(inserted_app_id));
             data.insert("title".to_string(), Value::String(inserted_title));
@@ -152,17 +152,23 @@ impl ReportClient {
     }
 
     fn get_filtered_data(&self, app_id: &str, title: &str) -> Option<(String, String)> {
+        let mut original = Map::new();
+        original.insert("app".into(), Value::String(app_id.into()));
+        original.insert("title".into(), Value::String(title.into()));
+        self.client.filter_capture(&self.active_window_bucket_name, AwEvent {
+            id: None, timestamp: Utc::now(), duration: TimeDelta::zero(), data: original,
+        })?;
         let filter_result = self.config.match_window_data(app_id, title);
         match filter_result {
             FilterResult::Replace(replacement) => {
                 let app_id = if let Some(replace_app_id) = replacement.replace_app_id {
-                    trace!("Replacing app_id by {replace_app_id}");
+                    trace!("Applying app exclusion rule");
                     replace_app_id
                 } else {
                     app_id.to_string()
                 };
                 let title = if let Some(replace_title) = replacement.replace_title {
-                    trace!("Replacing title by {replace_title}");
+                    trace!("Applying title exclusion rule");
                     replace_title
                 } else {
                     title.to_string()
