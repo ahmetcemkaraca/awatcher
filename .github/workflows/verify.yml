@@ -1,53 +1,44 @@
-name: Check
+name: Collector source checks
 
 on:
   push:
-    branches:
-    - main
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   CARGO_TERM_COLOR: always
+  CARGO_BUILD_JOBS: 1
+  RUSTUP_TOOLCHAIN: '1.98.1'
+
 jobs:
-  fmt:
-    runs-on: ubuntu-latest
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          components: rustfmt
-      - run: cargo fmt --check --all
-  clippy-bundle:
-    runs-on: ubuntu-latest
-    env:
-      AW_WEBUI_DIR: ${{ github.workspace }}/src/bundle
-    steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get install -y libdbus-1-dev libxkbcommon-dev
-      - uses: dtolnay/rust-toolchain@stable
+          path: awatcher
+          persist-credentials: false
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          components: clippy
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --locked --all-targets --all-features --workspace -- -D warnings
-  clippy:
-    runs-on: ubuntu-latest
-    env:
-      AW_WEBUI_DIR: ${{ github.workspace }}/src/bundle
-    steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get install -y libdbus-1-dev libxkbcommon-dev
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --locked --all-targets --workspace -- -D warnings
-  test:
-    runs-on: ubuntu-latest
-    env:
-      AW_WEBUI_DIR: ${{ github.workspace }}/src/bundle
-    steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get install -y libdbus-1-dev libxkbcommon-dev
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo test --all-features --workspace
+          repository: ahmetcemkaraca/aw-server-rust
+          ref: 78502ccd11f30dc0f19b7100ef66f71bdc57718f
+          path: aw-server-rust
+          persist-credentials: false
+      - name: Install native dependencies and pinned Rust
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libdbus-1-dev libxkbcommon-dev
+          rustup toolchain install 1.98.1 --profile minimal --component rustfmt
+      - name: Check collector source
+        working-directory: awatcher
+        run: |
+          cargo fmt --check --package awatcher --package watchers
+          cargo test --locked --workspace

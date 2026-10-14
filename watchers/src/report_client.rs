@@ -155,9 +155,15 @@ impl ReportClient {
         let mut original = Map::new();
         original.insert("app".into(), Value::String(app_id.into()));
         original.insert("title".into(), Value::String(title.into()));
-        self.client.filter_capture(&self.active_window_bucket_name, AwEvent {
-            id: None, timestamp: Utc::now(), duration: TimeDelta::zero(), data: original,
-        })?;
+        self.client.filter_capture(
+            &self.active_window_bucket_name,
+            AwEvent {
+                id: None,
+                timestamp: Utc::now(),
+                duration: TimeDelta::zero(),
+                data: original,
+            },
+        )?;
         let filter_result = self.config.match_window_data(app_id, title);
         match filter_result {
             FilterResult::Replace(replacement) => {

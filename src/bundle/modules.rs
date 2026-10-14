@@ -224,7 +224,7 @@ mod tests {
     use std::io::Write;
     use tempfile::{tempdir, TempDir};
 
-    #[test]
+    #[rstest]
     fn test_get_watchers_from_path_env() {
         let dir = tempdir().unwrap();
 

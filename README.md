@@ -83,6 +83,7 @@ The config file is in the default directory (`~/.config/awatcher`).
 [server]
 port = 5600
 host = "127.0.0.1"
+api-key = "ABC" # if the server requires an API key to connect
 
 [awatcher]
 idle-timeout-seconds=180
@@ -100,10 +101,17 @@ replace-title = "Unknown"
 
 - `server.port` and `server.host` address the ActivityWatch server instance.
 - `awatcher.idle-timeout-seconds` is the time of inactivity when it is considered "idle".
-- `awatcher.poll-time-idle-seconds` and `awatcher.poll-time-window-seconds` are 
-  intervals between collecting and sending statistics.
+- `awatcher.poll-time-idle-seconds` and `awatcher.poll-time-window-seconds` are intervals between collecting and sending statistics.
 
 All options of `server` and `awatcher` config file's sections can be overridden with command-line arguments, as well as the config path. See the builtin help in the command for details.
+
+### API Key
+
+ActivityWatch server can require an authentication by API key which is resolved using the following priority order:
+
+1.  `--api-key` or environment variable `AW_API_KEY`
+2. **awatcher config** — `[server].api-key` in `~/.config/awatcher/config.toml`
+3. **aw-server-rust config** — `[auth].api_key` in `~/.config/activitywatch/aw-server-rust/config.toml` (only when the server host is recognized as local)
 
 ### Filters
 
@@ -123,7 +131,10 @@ Matches are case sensitive regular expressions between implicit ^ and $:
 - `.*` matches any number of any characters
 - `.+` matches 1 or more any characters.
 - `word` is an exact match.
-- Use escapes `\` to match special characters, e.g. `org\.kde\.Dolphin`
+- Use escapes `\` to match special characters literally, e.g. `org\.kde\.Dolphin`.
+  The config file is TOML, where a backslash in a double-quoted string is an escape character itself,
+  so keep it as-is by using a single-quoted (literal) string, e.g. `match-app-id = 'org\.kde\.Dolphin'`,
+  or double the backslash in a double-quoted string, e.g. `match-app-id = "org\\.kde\\.Dolphin"`.
 
 #### Captures
 
@@ -179,6 +190,6 @@ The executable can be bundled with a tray icon, ActivityWatch server and, option
 to build the "dist" folder, 
 1. Build the executable with `AW_WEBUI_DIR=/absolute/path/to/dist` and `--features=bundle`.
 
-This should be compiled on nightly. The complete bundled version is also built and released.
+The complete bundled version is also built and released.
 
 The tray can be disabled with `--no-tray` option in the bundled version.

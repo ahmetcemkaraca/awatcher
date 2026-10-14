@@ -59,20 +59,33 @@ async fn main() -> anyhow::Result<(), Box<dyn Error>> {
     let client = Arc::new(ReportClient::new(config).await?);
 
     let policy = if std::env::var("PEAKACTIVITY_CAPTURE").as_deref() == Ok("1") {
-        let mut policy: watchers::CapturePolicy = serde_json::from_str(&std::env::var("PEAKACTIVITY_CAPTURE_POLICY")?)?;
+        let mut policy: watchers::CapturePolicy =
+            serde_json::from_str(&std::env::var("PEAKACTIVITY_CAPTURE_POLICY")?)?;
         policy.validate()?;
         Some(policy)
-    } else { None };
-    let idle_enabled = policy.as_ref().is_none_or(|p| p.active(chrono::Utc::now()) && p.idle);
-    let window_enabled = policy.as_ref().is_none_or(|p| p.active(chrono::Utc::now()) && (p.window || p.browser));
+    } else {
+        None
+    };
+    let idle_enabled = policy
+        .as_ref()
+        .is_none_or(|p| p.active(chrono::Utc::now()) && p.idle);
+    let window_enabled = policy
+        .as_ref()
+        .is_none_or(|p| p.active(chrono::Utc::now()) && (p.window || p.browser));
     let idle_client = Arc::clone(&client);
     let idle_future = async move {
-        if idle_enabled { run_first_supported(idle_client, &WatcherType::Idle).await }
-        else { std::future::pending().await }
+        if idle_enabled {
+            run_first_supported(idle_client, &WatcherType::Idle).await
+        } else {
+            std::future::pending().await
+        }
     };
     let active_window_future = async move {
-        if window_enabled { run_first_supported(client, &WatcherType::ActiveWindow).await }
-        else { std::future::pending().await }
+        if window_enabled {
+            run_first_supported(client, &WatcherType::ActiveWindow).await
+        } else {
+            std::future::pending().await
+        }
     };
     let sigterm = async {
         signal(SignalKind::terminate()).unwrap().recv().await;
